@@ -1,0 +1,8 @@
+[package]
+name = "hermite"
+version = "0.1"
+lean_version = "leanprover-community/lean:3.50.3"
+path = "src"
+
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "ec80bb1545ee17237ac0961a91bb2072780643c9"}
