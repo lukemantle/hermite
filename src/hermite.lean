@@ -243,7 +243,57 @@ def double_factorial : ℕ → ℕ
 notation n `‼` := double_factorial n -- this is \!! not two !'s
 localized "notation (name := nat.factorial) n `!`:10000 := nat.factorial n" in nat
 
--- def hermite_coeff_explicit (n k : ℕ) := ((n !) : ℝ) * ((-1 : ℝ) ^ ((n-k)/2)) / (())
+-- a _ 2n, 2k
+def hermite_coeff_explicit_even (n k : ℕ) : ℝ := (-1)^(n - k) * double_factorial (2*n - 2*k - 1) * nat.choose (2*n) (2*k)
+
+-- a _ 2n+1, 2k+1
+def hermite_coeff_explicit_odd (n k : ℕ) : ℝ := (-1)^(n - k) * double_factorial (2*n - 2*k - 1) * nat.choose (2*n + 1) (2*k + 1)
+
+#eval hermite_coeff_explicit_odd 3 2
+
+lemma hermite_coeff_even_zero (n k : ℕ) : odd (n + k) → coeff (hermite n) k = 0 :=
+begin
+  sorry
+end
+
+lemma hermite_coeff_eq_explicit_even (n k : ℕ) : hermite_coeff_explicit_even n k = coeff (hermite (2*n)) (2*k) :=
+begin
+  induction n with n ihn generalizing k,
+  { sorry },
+  { induction k with k ihk,
+    { sorry },
+    { repeat {rw nat.mul_succ},
+      rw hermite_recur_coeff_two (2*n) (2*k),
+      sorry } }
+end
+
+lemma hermite_coeff_eq_explicit_odd (n k : ℕ) : hermite_coeff_explicit_odd n k = coeff (hermite (2*n + 1)) (2*k + 1) := sorry
+
+-- lemma hermite_coeff_explicit_even (n k : ℕ) :
+-- coeff (hermite (n + 2)) (k + 2) = coeff (hermite n) k - (2*k + 5) * (coeff (hermite n) (k + 2))
+-- + (k + 3) * (k + 4) * (coeff (hermite n) (k + 4)) :=
+
+lemma hermite_coeff_explicit_recur_even (n k : ℕ) :
+hermite_coeff_explicit_even (n + 1) (k + 1) = hermite_coeff_explicit_even n k -
+(4*k + 5) * hermite_coeff_explicit_even n (k+1)
++ (2*k + 3) * (2*k + 4) * (hermite_coeff_explicit_even n (k+2)) :=
+begin
+  induction n with n ih,
+  { sorry },
+  { sorry } -- unfold, use properties of bin coefficient and !!, rw cast
+end
+
+lemma hermite_coeff_explicit_recur_odd (n k : ℕ) :
+hermite_coeff_explicit_odd (n + 1) (k + 1) = hermite_coeff_explicit_odd n k -
+(4*k + 5) * hermite_coeff_explicit_odd n (k+1)
++ (2*k + 3) * (2*k + 4) * (hermite_coeff_explicit_odd n (k+2)) :=
+begin
+  induction n with n ih,
+  { sorry },
+  { sorry } -- unfold, use properties of bin coefficient and !!, rw cast
+end
+
+-- (2m)! = 2^m * m! * (2m - 1)!!
 
 lemma hermite_appell : ∀ n : ℕ, derivative (hermite (n+1)) = (n+1) * (hermite n) :=
 begin
@@ -251,5 +301,8 @@ begin
   induction n with n ih,
   { rw [hermite_zero, hermite_one],
     simp },
-  { rw hermite_succ, }
+  { rw hermite_succ,
+    sorry }
 end
+
+#eval (0-1) !!
