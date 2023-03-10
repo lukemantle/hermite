@@ -1,6 +1,8 @@
 import analysis.calculus.mean_value
 import analysis.special_functions.exp
 import analysis.special_functions.exp_deriv
+import data.nat.factorial.basic
+import data.nat.choose.basic
 open polynomial
 
 open set filter
@@ -156,7 +158,7 @@ end
 
 #check x_sub_dx_coeff
 
-lemma hermite_recur_coeff (n : ℕ) (k : ℕ) :
+lemma hermite_recur_coeff (n k : ℕ) :
 coeff (hermite (n + 1)) (k + 1) = coeff (hermite n) k - (k+2)*(coeff (hermite n) (k+2)) :=
 begin
   rw [hermite_succ, x_sub_dx_coeff, coeff_X_mul, coeff_derivative, mul_comm],
@@ -164,6 +166,18 @@ begin
   { rw this, },
   { simp only [nat.cast_add, nat.cast_one],
     ring, },
+end
+
+lemma hermite_recur_coeff_two (n k : ℕ) :
+coeff (hermite (n + 2)) (k + 2) = coeff (hermite n) k - (2*k + 5) * (coeff (hermite n) (k + 2))
++ (k + 3) * (k + 4) * (coeff (hermite n) (k + 4)) :=
+begin
+  repeat {rw hermite_recur_coeff},
+  -- generalize : coeff (hermite n) k = A,
+  -- generalize : coeff (hermite n) (k + 2) = B,
+  -- generalize : coeff (hermite n) (k + 4) = C,
+  simp only [algebra_map.coe_one, nat.cast_add],
+  ring,
 end
 
 lemma hermite_upper_coeff_zero (n k : ℕ) : coeff (hermite n) (n+k+1) = 0 :=
@@ -220,4 +234,22 @@ begin
     rw ← eval_x_sub_dx_eq_fn (hermite n) (hermite_exp n) h x }
 end
 
-#check eval_x_sub_dx_eq
+
+def double_factorial : ℕ → ℕ
+| 0 := 1
+| 1 := 1
+| (k+2) := (k+2) * double_factorial k
+
+notation n `‼` := double_factorial n -- this is \!! not two !'s
+localized "notation (name := nat.factorial) n `!`:10000 := nat.factorial n" in nat
+
+-- def hermite_coeff_explicit (n k : ℕ) := ((n !) : ℝ) * ((-1 : ℝ) ^ ((n-k)/2)) / (())
+
+lemma hermite_appell : ∀ n : ℕ, derivative (hermite (n+1)) = (n+1) * (hermite n) :=
+begin
+  intro n,
+  induction n with n ih,
+  { rw [hermite_zero, hermite_one],
+    simp },
+  { rw hermite_succ, }
+end
