@@ -86,6 +86,12 @@ begin
   { apply (cont_diff_top_iff_deriv.mp (cont_diff.iterated_deriv _ _ cont_diff_gaussian)).1 },
 end
 
+lemma exp_mul_exp_neg_eq_one (x : ℝ) : real.exp(x) * real.exp(-x) = 1 :=
+begin
+  rw real.exp_neg,
+  apply (mul_inv_eq_one₀ (real.exp_ne_zero (x))).mpr,
+  refl,
+end
 
 @[simp]
 lemma hermite_zero : hermite 0 = C 1 :=
@@ -101,25 +107,12 @@ begin
 end
 
 @[simp]
-lemma exp_mul_exp_neg_eq_one (x : ℝ) : real.exp(x) * real.exp(-x) = 1 :=
-begin
-  rw real.exp_neg,
-  apply (mul_inv_eq_one₀ (real.exp_ne_zero (x))).mpr,
-  refl,
-end
-
-@[simp]
 lemma hermite_exp_zero : hermite_exp 0 = (λ x, 1) :=
 begin
   ext,
-  simp [hermite_exp, inv_gaussian, gaussian]
+  simp [hermite_exp, inv_gaussian, gaussian, exp_mul_exp_neg_eq_one]
 end
 
-lemma eval_dx_eq (p : polynomial ℝ) :
-(λ (x : ℝ), eval x p.derivative) = deriv (λ (x : ℝ), eval x p) :=
-begin
-  ext, simp only [eq_self_iff_true, polynomial.deriv],
-end
 
 lemma eval_x_sub_dx_eq (p : polynomial ℝ) :
 (λ (x : ℝ), eval x (x_sub_dx p)) = x_sub_dx_fn (λ (x : ℝ), eval x p) :=
@@ -219,8 +212,7 @@ begin
   simp
 end
 
-example (x : ℝ) (n : ℕ): differentiable_at ℝ (deriv^[n] gaussian) x :=
-(cont_diff_top_iff_deriv.mp (cont_diff.iterated_deriv n gaussian cont_diff_gaussian)).1 x
+
 
 lemma eval_x_sub_dx_eq_fn (p : polynomial ℝ) (f : ℝ → ℝ) (h : (λ x, eval x p) = f) (x : ℝ) :
 (λ x, (eval x (x_sub_dx p))) = x_sub_dx_fn f :=
