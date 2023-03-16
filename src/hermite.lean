@@ -275,6 +275,18 @@ def hermite_coeff_explicit_odd (n k : ℕ) : ℝ := (-1)^(n - k) * double_factor
 #eval hermite_coeff_explicit_odd 3 2
 #check hermite_recur_coeff
 
+lemma odd_of_odd_add_even (n k : ℕ) : odd (n + k) → even k → odd n :=
+begin
+  intros hnk hk,
+  exact (nat.odd_add.mp hnk).mpr hk
+end
+
+lemma add_two_of_succ_add_succ (n k : ℕ) : (n.succ + k.succ) = (n + k + 2) :=
+begin
+  repeat {rw ← nat.add_one},
+  ring
+end
+
 lemma hermite_coeff_odd_zero (n k : ℕ) : odd (n + k) → coeff (hermite n) k = 0 :=
 begin
   induction n with n ih generalizing k,
@@ -290,18 +302,8 @@ begin
     { rw hermite_recur_coeff_zero,
       rw [ih 1 h, neg_zero] },
     { rw hermite_recur_coeff,
-      have hnk₁ : odd (n + k),
-      { cases h with m hm,
-        rw [nat.add_succ, nat.succ_add, nat.succ_inj'] at hm,
-        cases m,
-        { -- m can't be zero
-          exact false.rec _ (nat.succ_ne_zero _ hm) }, -- how does this line work?
-        { exact ⟨_, nat.succ_inj'.mp hm⟩ }, },
-      rw ih k hnk₁,
-      have hnk₂ : odd (n + (k + 2)),
-      { repeat { rw ← nat.add_one at h },
-        rwa [(by linarith : n + 1 + (k + 1) = n + (k + 2))] at h },
-      rw ih (k+2) hnk₂,
+      rw ih k (odd_of_odd_add_even (n+k) 2 (by rwa add_two_of_succ_add_succ at h) (even_two)),
+      rw ih (k+2) (by rwa [add_two_of_succ_add_succ, add_assoc] at h),
       ring }
   }
 end
@@ -313,7 +315,7 @@ end
 lemma hermite_coeff_explicit_recur_even (n k : ℕ) :
 hermite_coeff_explicit_even (n + 1) (k + 1) = hermite_coeff_explicit_even n k -
 (4*k + 5) * hermite_coeff_explicit_even n (k+1)
-+ (2*k + 2) * (2*k + 3) * (hermite_coeff_explicit_even n (k+2)) :=
++ (2*k + 3) * (2*k + 4) * (hermite_coeff_explicit_even n (k+2)) :=
 begin
   induction n with n ih generalizing k,
   { cases k,
@@ -322,8 +324,11 @@ begin
           hermite_coeff_explicit_even_upper_zero 0 0,
           hermite_coeff_explicit_even_upper_zero 0 1],
       ring },
-    { rw [zero_add, ← nat.add_one, add_comm, ← add_assoc],
-      rw hermite_coeff_explicit_even_upper_zero _ _, } },
+    { sorry
+      -- norm_num,
+      -- rw [zero_add, ← nat.add_one, add_comm, ← add_assoc],
+      -- rw hermite_coeff_explicit_even_upper_zero _ _, 
+      } },
   { sorry } -- unfold, use properties of bin coefficient and !!, rw cast
 end
 
@@ -363,7 +368,11 @@ begin
       rw hermite_recur_coeff_two (2*n) (2*k),
       rw hermite_coeff_explicit_recur_even,
       repeat {rw ihn _},
-      simp only [nat.cast_id, nat.cast_mul], 
+      -- simp only [nat.cast_id, nat.cast_mul], 
+      -- simp only [mul_add, mul_one],
+      generalize : hermite (2 * n) = f,
+      generalize : coeff = g,
+
       sorry } }
 end
 
