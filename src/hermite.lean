@@ -149,8 +149,6 @@ begin
   simp,
 end
 
-#check x_sub_dx_coeff
-
 lemma hermite_recur_coeff (n k : ℕ) :
 coeff (hermite (n + 1)) (k + 1) = coeff (hermite n) k - (k+2)*(coeff (hermite n) (k+2)) :=
 begin
@@ -166,11 +164,8 @@ coeff (hermite (n + 2)) (k + 2) = coeff (hermite n) k - (2*k + 5) * (coeff (herm
 + (k + 3) * (k + 4) * (coeff (hermite n) (k + 4)) :=
 begin
   repeat {rw hermite_recur_coeff},
-  -- generalize : coeff (hermite n) k = A,
-  -- generalize : coeff (hermite n) (k + 2) = B,
-  -- generalize : coeff (hermite n) (k + 4) = C,
   simp only [algebra_map.coe_one, nat.cast_add],
-  ring,
+  ring
 end
 
 lemma hermite_upper_coeff_zero (n k : ℕ) : coeff (hermite n) (n+k+1) = 0 :=
@@ -237,8 +232,12 @@ def double_factorial : ℕ → ℕ
 | 1 := 1
 | (k+2) := (k+2) * double_factorial k
 
-notation n `‼` := double_factorial n -- this is \!! not two !'s
+notation n `‼`:10000 := double_factorial n -- this is \!! not two !'s
 localized "notation (name := nat.factorial) n `!`:10000 := nat.factorial n" in nat
+
+def hermite_coeff_explicit (n k : ℕ) : ℤ :=
+if (even (n-k)) then (-1)^((n-k)/2) * (n-k-1)‼ * nat.choose n k
+else 0
 
 -- a _ 2n, 2k
 @[simp]
@@ -253,24 +252,39 @@ lemma hermite_coeff_explicit_even_one_one : hermite_coeff_explicit_even 1 1 = 1 
 lemma hermite_coeff_explicit_even_upper_zero (n k : ℕ) : hermite_coeff_explicit_even n (n+k+1) = 0 :=
 begin
   induction n with n ih,
-  { unfold hermite_coeff_explicit_even,
-    rw mul_zero,
-    norm_num,
+  { norm_num,
     refl },
-  { sorry }
+  { norm_num,
+    right,
+    apply nat.choose_eq_zero_of_lt,
+    ring,
+    apply lt_add_of_pos_right,
+    simp }
 end
 
 -- a _ 2n+1, 2k+1
 @[simp]
 def hermite_coeff_explicit_odd (n k : ℕ) : ℝ := (-1)^(n - k) * double_factorial (2*n - 2*k - 1) * nat.choose (2*n + 1) (2*k + 1)
 
-#eval hermite_coeff_explicit_odd 3 2
-#check hermite_recur_coeff
-
 lemma odd_of_odd_add_even (n k : ℕ) : odd (n + k) → even k → odd n :=
 begin
   intros hnk hk,
   exact (nat.odd_add.mp hnk).mpr hk
+end
+
+lemma hermite_coeff_explicit_odd_zero_zero : hermite_coeff_explicit_odd 0 0 = 1 := by simp
+
+lemma hermite_coeff_explicit_odd_upper_zero (n k : ℕ) : hermite_coeff_explicit_odd n (n+k+1) = 0 :=
+begin
+  induction n with n ih,
+  { norm_num,
+    refl },
+  { norm_num,
+    right,
+    apply nat.choose_eq_zero_of_lt,
+    ring,
+    apply lt_add_of_pos_right,
+    simp }
 end
 
 lemma add_two_of_succ_add_succ (n k : ℕ) : (n.succ + k.succ) = (n + k + 2) :=
@@ -316,12 +330,16 @@ begin
           hermite_coeff_explicit_even_upper_zero 0 0,
           hermite_coeff_explicit_even_upper_zero 0 1],
       ring },
-    { sorry
-      -- norm_num,
-      -- rw [zero_add, ← nat.add_one, add_comm, ← add_assoc],
-      -- rw hermite_coeff_explicit_even_upper_zero _ _, 
-      } },
-  { sorry } -- unfold, use properties of bin coefficient and !!, rw cast
+    { rw [zero_add, ← nat.add_one, (by linarith : k + 1 + 1 = 1 + k + 1)],
+      rw [hermite_coeff_explicit_even_upper_zero 1 k,
+          (by linarith : 1 + k + 1 = 0 + (k + 1) + 1),
+          hermite_coeff_explicit_even_upper_zero 0 (k + 1),
+          (by linarith : k + 1 + 2 = 0 + (k + 2) + 1),
+          hermite_coeff_explicit_even_upper_zero 0 (k + 2)],
+      norm_num,
+      rw [two_mul, nat.add_one k, nat.add_succ,
+          nat.choose_zero_succ (k.succ + k), nat.cast_zero] }},
+  {  } -- unfold, use properties of bin coefficient and !!, rw cast
 end
 
 lemma hermite_coeff_explicit_recur_even_zero (n : ℕ) :
@@ -355,22 +373,50 @@ begin
       rw [hermite_coeff_explicit_recur_even_zero, hermite_recur_coeff_zero_two],
       repeat {rw ihn _},
       rw [mul_one, mul_zero], },
-    { 
-      repeat {rw nat.mul_succ},
+    { repeat {rw nat.mul_succ},
       rw hermite_recur_coeff_two (2*n) (2*k),
       rw hermite_coeff_explicit_recur_even,
       repeat {rw ihn _},
-      -- simp only [nat.cast_id, nat.cast_mul], 
-      -- simp only [mul_add, mul_one],
-      generalize : hermite (2 * n) = f,
-      generalize : coeff = g,
+      norm_num,
+      ring } }
+end
 
-      sorry } }
+lemma hermite_coeff_eq_explicit_odd (n k : ℕ) : hermite_coeff_explicit_odd n k = coeff (hermite (2*n + 1)) (2*k + 1) :=
+begin
+  induction n with n ihn generalizing k,
+  { cases k,
+    { 
+      repeat { rw mul_zero },
+      rw [hermite_coeff_explicit_odd_zero_zero, hermite_one_one] },
+    { 
+      rw hermite_upper_coeff_zero',
+      rw hermite_coeff_explicit_odd_upper_zero
+      -- rw [mul_zero, ← nat.add_one, ← zero_add (k + 1), ← add_assoc,
+      --     hermite_coeff_explicit_even_upper_zero 0 k, hermite_upper_coeff_zero'],
+      simp } },
+  -- { cases k,
+  --   { rw [nat.mul_succ, mul_zero],
+  --     rw [hermite_coeff_explicit_recur_even_zero, hermite_recur_coeff_zero_two],
+  --     repeat {rw ihn _},
+  --     rw [mul_one, mul_zero], },
+  --   { repeat {rw nat.mul_succ},
+  --     rw hermite_recur_coeff_two (2*n) (2*k),
+  --     rw hermite_coeff_explicit_recur_even,
+  --     repeat {rw ihn _},
+  --     norm_num,
+  --     ring_nf } }
+  
 end
 
 lemma hermite_coeff_eq_explicit_odd (n k : ℕ) : hermite_coeff_explicit_odd n k = coeff (hermite (2*n + 1)) (2*k + 1) := sorry
 
 -- (2m)! = 2^m * m! * (2m - 1)!!
+
+
+
+
+
+
 
 lemma hermite_appell : ∀ n : ℕ, derivative (hermite (n+1)) = (n+1) * (hermite n) :=
 begin
