@@ -37,11 +37,17 @@ end
 
 lemma hermite_explicit_recur_zero (n : ℕ) : hermite_explicit (n + 1) 0 = - hermite_explicit n 1 :=
 begin
+  cases n,
+  {
+    sorry,
+  },
+  {
   simp only [hermite_explicit],
   rw nat.sub_zero,
   rw (by simp : n + 1 - 1 = n - 2 + 2),
   rw double_factorial_add_two,
   sorry
+  }
 end
 
 
@@ -58,6 +64,7 @@ end
 lemma hermite_explicit_recur (n k : ℕ) : hermite_explicit (n + 1) (k + 1) =
 hermite_explicit n k - (k + 2) * hermite_explicit n (k + 2) :=
 begin
+
   simp only [hermite_explicit],
   rw (by simp : (n + 1 - (k + 1) = n - k)),
   have hnk : even (n - k) ∨ odd (n - k), from nat.even_or_odd (n - k),
