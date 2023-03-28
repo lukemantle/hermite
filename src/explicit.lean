@@ -21,6 +21,10 @@ def double_factorial : ℕ → ℕ
 notation n `‼`:10000 := double_factorial n -- this is \!! not two !'s
 localized "notation (name := nat.factorial) n `!`:10000 := nat.factorial n" in nat
 
+-- lemma double_factorial_zero
+
+-- lemma double_factorial_one
+
 lemma double_factorial_def (n : ℕ) : double_factorial (n + 2) = (n + 2) * double_factorial n := rfl
 
 lemma double_factorial_def' (n : ℕ) : (n+1) ‼ = (n+1) * (n-1)‼ := by { cases n; refl }
@@ -134,19 +138,8 @@ end
 
 lemma hermite_explicit'_recur_zero (n : ℕ) : hermite_explicit' (n + 2) 0 = -hermite_explicit' n 1 :=
 begin
-    -- Simplify `even (n+2)` to `even n`
-  simp only [hermite_explicit', nat.even_add, even_two, iff_true],
-  split_ifs,
-  { rw neg_one_half_pow,
-    nth_rewrite 2 neg_eq_neg_one_mul,
-    rw [(by ring : n + 2 - 1 = n + 1), double_factorial_def'],
-    simp only [mul_assoc],
-    congr' 2,
-    rw [nat.choose, nat.choose_zero_right,
-        nat.choose_zero_right, nat.choose_one_right],
-    norm_cast,
-    simp [mul_one, add_comm, mul_comm] },
-  { simp }
+  repeat {rw ← hermite_explicit_eq_explicit'},
+  apply hermite_explicit_recur_zero
 end
 
 lemma hermite_explicit'_zero (k : ℕ) : hermite_explicit' 0 k = 1 := by simp
