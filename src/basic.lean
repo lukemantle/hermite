@@ -23,3 +23,13 @@ begin
   simp only [hermite],
   rw function.iterate_succ' x_sub_dx n,
 end
+
+@[simp]
+lemma hermite_zero : hermite 0 = C 1 := rfl
+
+@[simp]
+lemma hermite_one : hermite 1 = X :=
+begin
+  rw [hermite_succ, x_sub_dx_def],
+  simp only [hermite_zero, map_one, mul_one, derivative_one, sub_zero],
+end

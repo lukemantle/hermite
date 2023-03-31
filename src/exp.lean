@@ -47,7 +47,8 @@ def hermite_exp (n : ℕ) : ℝ → ℝ :=
 lemma hermite_exp_def (n : ℕ) : 
 hermite_exp n = λ x, (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) := rfl
 
-lemma hermite_exp_succ (n : ℕ) : hermite_exp (n + 1) = x_sub_dx_fn (hermite_exp n) :=
+lemma hermite_exp_succ (n : ℕ) : hermite_exp (n+1)
+= x_sub_dx_fn (hermite_exp n) :=
 begin
   ext,
   simp only [hermite_exp, x_sub_dx_fn, function.iterate_succ', function.comp_app,
@@ -56,7 +57,7 @@ begin
   ring,
   { simp [inv_gaussian] },
   { simp [inv_gaussian] },
-  { apply (cont_diff_top_iff_deriv.mp (cont_diff.iterated_deriv _ _ cont_diff_gaussian)).1 },
+  { apply (cont_diff_top_iff_deriv.mp (cont_diff.iterated_deriv _ _ cont_diff_gaussian)).1 }, 
 end
 
 lemma exp_mul_exp_neg_eq_one (x : ℝ) : real.exp(x) * real.exp(-x) = 1 :=
@@ -66,22 +67,12 @@ begin
   refl,
 end
 
-@[simp]
-lemma hermite_zero : hermite 0 = C 1 := rfl
-
-@[simp]
-lemma hermite_one : hermite 1 = X :=
-begin
-  rw [hermite_succ, x_sub_dx_def],
-  simp only [hermite_zero, map_one, mul_one, derivative_one, sub_zero],
-end
-
-@[simp]
-lemma hermite_exp_zero : hermite_exp 0 = (λ x, 1) :=
-begin
-  ext,
-  simp [hermite_exp, inv_gaussian, gaussian, exp_mul_exp_neg_eq_one]
-end
+-- @[simp]
+-- lemma hermite_exp_zero : (λ x, (-1)^0 * (inv_gaussian x) * (deriv^[0] gaussian x)) = (λ x, 1) :=
+-- begin
+--   ext,
+--   simp [hermite_exp, inv_gaussian, gaussian, exp_mul_exp_neg_eq_one]
+-- end
 
 lemma eval_x_sub_dx_eq (p : polynomial ℝ) :
 (λ (x : ℝ), eval x (x_sub_dx p)) = x_sub_dx_fn (λ (x : ℝ), eval x p) :=
@@ -90,13 +81,13 @@ begin
 end
 
 lemma hermite_eq_exp (n : ℕ) :
-(λ x, eval x (hermite n)) = hermite_exp n :=
+(λ x, eval x (hermite n)) = λ x, (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=
 begin
   induction n with n ih,
-  { simp, },
-  { rw [hermite_exp_succ, hermite_succ, ← ih],
-    apply eval_x_sub_dx_eq, },
+  { simp [inv_gaussian_mul_gaussian] },
+  { rw [← hermite_exp_def, hermite_exp_succ,
+    hermite_succ, eval_x_sub_dx_eq, hermite_exp_def, ih] },
 end
 
-lemma hermite_eq_exp_apply : ∀ (n : ℕ) (x : ℝ), eval x (hermite n) = (hermite_exp n) x :=
+lemma hermite_eq_exp_apply : ∀ (n : ℕ) (x : ℝ), eval x (hermite n) = (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=
 λ n x, congr_fun (hermite_eq_exp n) x

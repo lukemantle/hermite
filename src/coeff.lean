@@ -92,3 +92,4 @@ begin
       { rw (by simp [nat.succ_add, nat.add_succ] : n.succ + k.succ = n + k + 2) at h,
         exact (nat.odd_add.mp h).mpr even_two }}}
 end
+
