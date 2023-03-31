@@ -57,10 +57,15 @@ else 0
 lemma hermite_explicit_def' (n k : ℕ) : hermite_explicit' n k =
 if (even n) then (-1)^(n/2) * (n-1)‼ * nat.choose (n+k) k else 0 := rfl
 
+-- lemma hermite_explicit_eq_explicit' (n k : ℕ) :
+--   (if (even n) then (-1 : ℝ)^(n/2) * (n-1)‼ * nat.choose (n+k) k
+--   else 0) = (if (even n) then (-1 : ℝ)^(n/2) * (n-1)‼ * nat.choose (n+k) k
+--   else 0) := rfl
+
 lemma hermite_explicit_eq_explicit' (n k : ℕ) :
-  (if (even n) then (-1 : ℝ)^(n/2) * (n-1)‼ * nat.choose (n+k) k
-  else 0) = (if (even n) then (-1 : ℝ)^(n/2) * (n-1)‼ * nat.choose (n+k) k
-  else 0) := rfl
+  hermite_explicit (n+k) k = hermite_explicit' n k :=
+by simp [hermite_explicit, hermite_explicit', nat.add_sub_cancel]
+
 
 lemma hermite_explicit_upper (n k : ℕ) : hermite_explicit n (n + k + 1) = 0 :=
 begin
@@ -134,13 +139,8 @@ begin
           simp [hermite_explicit'] },
         repeat {rw hermite_explicit_def},
         repeat {rw nat.add_sub_cancel},
-        have h₁ : n'.succ.succ + k - (k + 2) = n',
-        {simp [← nat.add_one, ← nat.sub_sub]},
-        repeat {rw h₁},
-        have h₂ : n'.succ.succ + k = n' + (k + 2),
-        { repeat {rw ← nat.add_one},
-          ring },
-        nth_rewrite 1 h₂,
+        repeat {rw (by {simp [← nat.add_one, ← nat.sub_sub]} : n'.succ.succ + k - (k + 2) = n')},
+        rw (by { repeat {rw ← nat.add_one}, ring} : n'.succ.succ + k = n' + (k + 2)),
         repeat {rw ← hermite_explicit_def'}, 
         {apply hermite_explicit'_recur }}},
   { repeat {rw hermite_explicit_upper'};
@@ -168,8 +168,8 @@ lemma hermite_explicit'_zero (k : ℕ) : hermite_explicit' 0 k = 1 := by simp
 
 lemma hermite_explicit'_one (k : ℕ) : hermite_explicit' 1 k = 0 := by simp
 
-lemma hermite_explicit_eq_coeff (n k : ℕ) : 
-(if (even (n-k)) then (-1 : ℝ)^((n-k)/2) * (n-k-1)‼ * nat.choose n k else 0) = coeff (hermite n) k :=
+lemma hermite_coeff_eq_explicit (n k : ℕ) : 
+coeff (hermite n) k = if (even (n-k)) then (-1 : ℝ)^((n-k)/2) * (n-k-1)‼ * nat.choose n k else 0 :=
 begin
   induction n with n ih generalizing k,
   { cases k,
@@ -184,5 +184,6 @@ begin
       rw [ih k, ih (k+2)] }}
 end
 
-lemma hermite_explicit'_eq_coeff (n k : ℕ) : hermite_explicit' n k = coeff (hermite (n+k)) k :=
-by rw [hermite_explicit_def', ← hermite_explicit_eq_coeff, nat.add_sub_cancel]
+lemma hermite_coeff_eq_explicit' (n k : ℕ) :
+coeff (hermite (n+k)) k = if (even n) then (-1)^(n/2) * (n-1)‼ * nat.choose (n+k) k else 0 :=
+by rw [← hermite_explicit_def', ← hermite_explicit_eq_explicit', hermite_coeff_eq_explicit, ← hermite_explicit_def]

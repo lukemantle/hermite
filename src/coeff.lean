@@ -66,12 +66,6 @@ begin
   norm_num
 end
 
-lemma odd_of_odd_add_even (n k : ℕ) : odd (n + k) → even k → odd n :=
-begin
-  intros hnk hk,
-  exact (nat.odd_add.mp hnk).mpr hk
-end
-
 lemma hermite_coeff_odd_zero (n k : ℕ) : odd (n + k) → coeff (hermite n) k = 0 :=
 begin
   induction n with n ih generalizing k,
@@ -92,4 +86,3 @@ begin
       { rw (by simp [nat.succ_add, nat.add_succ] : n.succ + k.succ = n + k + 2) at h,
         exact (nat.odd_add.mp h).mpr even_two }}}
 end
-
