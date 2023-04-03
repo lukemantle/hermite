@@ -58,6 +58,6 @@ begin
     { rw [hermite_coeff_recur_zero, ih 1 hnk, neg_zero] },
     { rw [hermite_coeff_recur, ih k _, ih (k + 2) _, mul_zero, sub_zero],
       { rwa (by simp [nat.succ_add, nat.add_succ] : n.succ + k.succ = n + (k + 2)) at hnk },
-      { rw (by simp [nat.succ_add, nat.add_succ] : n.succ + k.succ = n + k + 2) at hnk,
+      { rw (by rw [nat.succ_add, nat.add_succ] : n.succ + k.succ = n + k + 2) at hnk,
         exact (nat.odd_add.mp hnk).mpr even_two }}}
 end
