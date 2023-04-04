@@ -20,10 +20,8 @@ def gaussian : ℝ → ℝ := λ x, real.exp (-(x^2 / 2))
 
 def inv_gaussian : ℝ → ℝ := λ x, real.exp (x^2 / 2)
 
-
 lemma inv_gaussian_mul_gaussian (x : ℝ) : inv_gaussian x * gaussian x = 1 :=
 by rw [gaussian, inv_gaussian, ← real.exp_add, add_neg_self, real.exp_zero]
-
 
 lemma deriv_gaussian (x : ℝ) : deriv gaussian x = -x * gaussian x :=
 by simp [gaussian, mul_comm]
@@ -81,12 +79,13 @@ begin
 end
 
 lemma hermite_eq_exp (n : ℕ) :
-(λ x, eval x (hermite n)) = λ x, (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=
+(λ x, eval x (map (algebra_map ℤ ℝ) (hermite n))) = 
+λ x, (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=
 begin
   induction n with n ih,
   { simp [inv_gaussian_mul_gaussian] },
   { rw [← hermite_exp_def, hermite_exp_succ,
-    hermite_succ, eval_x_sub_dx_eq, hermite_exp_def, ih] },
+    hermite_succ, ← x_sub_dx_map, eval_x_sub_dx_eq, hermite_exp_def, ih] },
 end
 
 lemma hermite_eq_exp_apply : ∀ (n : ℕ) (x : ℝ), eval x (hermite n) = (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=

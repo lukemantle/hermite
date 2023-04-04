@@ -1,14 +1,8 @@
-import analysis.calculus.mean_value
-import analysis.special_functions.exp
-import analysis.special_functions.exp_deriv
-import data.nat.factorial.basic
 import data.nat.choose.basic
 import basic
-import exp
 import coeff
-open polynomial
 
-open set filter
+open polynomial
 
 noncomputable theory
 
@@ -19,7 +13,7 @@ def double_factorial : ℕ → ℕ
 | (k+2) := (k+2) * double_factorial k
 
 notation n `‼`:10000 := double_factorial n -- this is \!! not two !'s
-localized "notation (name := nat.factorial) n `!`:10000 := nat.factorial n" in nat
+-- localized "notation (name := nat.factorial) n `!`:10000 := nat.factorial n" in nat
 
 lemma double_factorial_def (n : ℕ) : double_factorial (n + 2) = (n + 2) * double_factorial n := rfl
 
@@ -35,14 +29,14 @@ begin
       linarith },
 end
 
-lemma neg_one_half_pow (n : ℕ) : (-1 : ℝ) ^ ((n + 2) / 2) = (-1) * (-1) ^ (n / 2) :=
+lemma neg_one_half_pow (n : ℕ) : (-1 : ℤ) ^ ((n + 2) / 2) = (-1) * (-1) ^ (n / 2) :=
 begin
   rw [(by linarith : n+2 = n + 2 * 1), nat.add_mul_div_left, pow_add];
   simp
 end
 
 @[simp] -- a_{n, k}
-def hermite_explicit (n k : ℕ) : ℝ :=
+def hermite_explicit (n k : ℕ) : ℤ :=
 if (even (n-k)) then (-1)^((n-k)/2) * (n-k-1)‼ * nat.choose n k
 else 0
 
@@ -50,7 +44,7 @@ lemma hermite_explicit_def (n k : ℕ) : hermite_explicit n k =
 if (even (n-k)) then (-1)^((n-k)/2) * (n-k-1)‼ * nat.choose n k else 0 := rfl
 
 @[simp] -- alt definition of a_{n+k, k}
-def hermite_explicit' (n k : ℕ) : ℝ :=
+def hermite_explicit' (n k : ℕ) : ℤ :=
 if (even n) then (-1)^(n/2) * (n-1)‼ * nat.choose (n+k) k
 else 0
 
@@ -169,7 +163,7 @@ lemma hermite_explicit'_zero (k : ℕ) : hermite_explicit' 0 k = 1 := by simp
 lemma hermite_explicit'_one (k : ℕ) : hermite_explicit' 1 k = 0 := by simp
 
 lemma hermite_coeff_eq_explicit (n k : ℕ) : 
-coeff (hermite n) k = if (even (n-k)) then (-1 : ℝ)^((n-k)/2) * (n-k-1)‼ * nat.choose n k else 0 :=
+coeff (hermite n) k = if (even (n-k)) then (-1 : ℤ)^((n-k)/2) * (n-k-1)‼ * nat.choose n k else 0 :=
 begin
   induction n with n ih generalizing k,
   { cases k,
