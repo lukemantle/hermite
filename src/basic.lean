@@ -18,9 +18,9 @@ This file defines `hermite n`, the nth probabilist's Hermite polynomial.
 * `hermite n` : the nth probabilist's Hermite polynomial, defined as a `polynomial ℤ`, using
                 `x_sub_dx` recursively
 
-## Notation
-
 ## References
+
+[Hermite Polynomials](https://en.wikipedia.org/wiki/Hermite_polynomials)
 
 -/
 
@@ -35,7 +35,7 @@ def x_sub_dx := X * p - p.derivative
 
 @[simp] lemma x_sub_dx_def : x_sub_dx p = X * p - p.derivative := rfl
 
-@[simp] lemma x_sub_dx_apply {x : R} :
+lemma x_sub_dx_apply {x : R} :
   eval x (x_sub_dx p) = x * (eval x p) - (eval x (derivative p)) := by simp
 
 @[simp] lemma x_sub_dx_map {S : Type} [comm_ring S] {f : R →+* S} :
