@@ -9,7 +9,7 @@ noncomputable theory
 @[simp] lemma hermite_one_zero : coeff (hermite 1) 0 = 0 := by rw [hermite_one, coeff_X_zero]
 @[simp] lemma hermite_one_one : coeff (hermite 1) 1 = 1 := by rw [hermite_one, coeff_X_one]
 
-lemma x_sub_dx_coeff (p : polynomial ℝ) (k : ℕ) :
+lemma x_sub_dx_coeff (p : polynomial ℤ) (k : ℕ) :
   coeff (x_sub_dx p) k = coeff (X * p) k - coeff (p.derivative) k := by simp
 
 lemma hermite_coeff_recur_zero (n : ℕ) :

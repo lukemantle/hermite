@@ -88,5 +88,7 @@ begin
     hermite_succ, ← x_sub_dx_map, eval_x_sub_dx_eq, hermite_exp_def, ih] },
 end
 
-lemma hermite_eq_exp_apply : ∀ (n : ℕ) (x : ℝ), eval x (hermite n) = (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=
+lemma hermite_eq_exp_apply : 
+  ∀ (n : ℕ) (x : ℝ), eval x (map (algebra_map ℤ ℝ) (hermite n)) = 
+    (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) :=
 λ n x, congr_fun (hermite_eq_exp n) x
