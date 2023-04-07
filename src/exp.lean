@@ -7,14 +7,14 @@ open set filter
 
 noncomputable theory
 
-@[simp]
-def x_sub_dx_fn (f : ℝ → ℝ) :=
-id * f - deriv f
+-- @[simp]
+-- def x_sub_dx_fn (f : ℝ → ℝ) :=
+-- id * f - deriv f
 
-lemma x_sub_dx_fn_def (f : ℝ → ℝ) : x_sub_dx_fn f = id * f - deriv f := rfl
+-- lemma x_sub_dx_fn_def (f : ℝ → ℝ) : x_sub_dx_fn f = id * f - deriv f := rfl
 
-lemma x_sub_dx_fn_apply (f : ℝ → ℝ) (x : ℝ) :
-x_sub_dx_fn f x = x * f x - deriv f x := rfl
+-- lemma x_sub_dx_fn_apply (f : ℝ → ℝ) (x : ℝ) :
+-- x_sub_dx_fn f x = x * f x - deriv f x := rfl
 
 def gaussian : ℝ → ℝ := λ x, real.exp (-(x^2 / 2))
 
@@ -38,7 +38,6 @@ lemma cont_diff.iterated_deriv :
 | (n+1) f hf := cont_diff.iterated_deriv n (deriv f) (cont_diff_top_iff_deriv.mp hf).2
 
 
-@[simp]
 def hermite_exp (n : ℕ) : ℝ → ℝ :=
 λ x, (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x)
 
@@ -46,16 +45,16 @@ lemma hermite_exp_def (n : ℕ) :
 hermite_exp n = λ x, (-1)^n * (inv_gaussian x) * (deriv^[n] gaussian x) := rfl
 
 lemma hermite_exp_succ (n : ℕ) : hermite_exp (n+1)
-= x_sub_dx_fn (hermite_exp n) :=
+= id * (hermite_exp n) - deriv (hermite_exp n):=
 begin
   ext,
-  simp only [hermite_exp, x_sub_dx_fn, function.iterate_succ', function.comp_app,
+  simp only [hermite_exp, function.iterate_succ', function.comp_app,
              id.def, pi.mul_apply, pi.sub_apply, pow_succ],
   rw [deriv_mul, deriv_const_mul, deriv_inv_gaussian],
   ring,
   { simp [inv_gaussian] },
   { simp [inv_gaussian] },
-  { apply (cont_diff_top_iff_deriv.mp (cont_diff.iterated_deriv _ _ cont_diff_gaussian)).1 }, 
+  { apply (cont_diff_top_iff_deriv.mp (cont_diff.iterated_deriv _ _ cont_diff_gaussian)).1 }
 end
 
 lemma exp_mul_exp_neg_eq_one (x : ℝ) : real.exp(x) * real.exp(-x) = 1 :=
@@ -72,11 +71,12 @@ end
 --   simp [hermite_exp, inv_gaussian, gaussian, exp_mul_exp_neg_eq_one]
 -- end
 
-lemma eval_x_sub_dx_eq (p : polynomial ℝ) :
-(λ (x : ℝ), eval x (x_sub_dx p)) = x_sub_dx_fn (λ (x : ℝ), eval x p) :=
-begin
-  ext, simp,
-end
+-- lemma eval_x_sub_dx_eq (p : polynomial ℝ) :
+-- (λ (x : ℝ), eval x (X * p - p.derivative)) =
+-- id * (λ (x : ℝ), eval x p) - deriv (λ (x : ℝ), eval x p) :=
+-- begin
+--   ext, simp,
+-- end
 
 lemma hermite_eq_exp (n : ℕ) :
 (λ x, eval x (map (algebra_map ℤ ℝ) (hermite n))) = 
@@ -84,8 +84,9 @@ lemma hermite_eq_exp (n : ℕ) :
 begin
   induction n with n ih,
   { simp [inv_gaussian_mul_gaussian] },
-  { rw [← hermite_exp_def, hermite_exp_succ,
-    hermite_succ, ← x_sub_dx_map, eval_x_sub_dx_eq, hermite_exp_def, ih] },
+  { rw [← hermite_exp_def, hermite_exp_succ, hermite_succ, hermite_exp_def, ← ih],
+    ext,
+    simp },
 end
 
 lemma hermite_eq_exp_apply : 
