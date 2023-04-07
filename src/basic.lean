@@ -45,16 +45,14 @@ end x_sub_dx
 
 section hermite
 
+#check (X : polynomial ℤ).derivative
+
 /-- the nth probabilist's Hermite polynomial -/
-def hermite (n : ℕ) : polynomial ℤ := nat.iterate x_sub_dx n 1
+noncomputable def hermite : ℕ → polynomial ℤ
+| 0     := 1
+| (n+1) := x_sub_dx (hermite n)
 
-lemma hermite_eq_iter {n : ℕ} : hermite n = nat.iterate x_sub_dx n 1 := rfl
-
-@[simp] lemma hermite_succ {n : ℕ} : hermite n.succ = x_sub_dx (hermite n) :=
-begin
-  rw [hermite_eq_iter, function.iterate_succ' x_sub_dx n],
-  refl,
-end
+@[simp] lemma hermite_succ {n : ℕ} : hermite n.succ = x_sub_dx (hermite n) := by rw hermite
 
 @[simp] lemma hermite_zero : hermite 0 = C 1 := rfl
 
