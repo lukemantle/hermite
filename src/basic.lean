@@ -139,7 +139,7 @@ begin
   ring,
 end
 
-lemma polynomial.coeff_comp_neg_X {R : Type} [comm_ring R] {p : polynomial R} (k : ℕ) :
+lemma coeff_comp_neg_X {R : Type} [comm_ring R] {p : polynomial R} (k : ℕ) :
   (p.comp (-X)).coeff k = (-1)^k * (p.coeff k) :=
 begin
   rw [mul_comm, comp, eval₂, coeff_sum, (by simp : -(X : polynomial R) = C (-1) * X)],
@@ -152,6 +152,18 @@ begin
     rw [not_mem_support_iff.mp hkp, zero_mul] }
 end
 
+lemma neg_one_pow_eq_neg_of_odd_add (n k : ℕ) (h : odd (n+k)) : ((-1) : ℤ)^n = -((-1) : ℤ)^k :=
+begin
+  cases nat.even_or_odd n with hn hn,
+  { rw [add_comm, nat.odd_add] at h,
+    rw [even.neg_one_pow hn, odd.neg_one_pow],
+    { simp },
+    { exact h.mpr hn } },
+  { rw nat.odd_add at h,
+    rw [odd.neg_one_pow hn, even.neg_one_pow],
+    exact h.mp hn }
+end
+
 lemma coeff_hermite_comp_neg_X (n k : ℕ) :
 ((hermite n).comp (-X)).coeff k = (-1)^n * (hermite n).coeff k :=
 begin
@@ -160,49 +172,60 @@ begin
   simp,
 end
 
-lemma eq_neg_of_odd_add (n k : ℕ) (h : odd (n+k)) : ((-1) : ℤ)^n = -((-1) : ℤ)^k :=
-begin
-  cases nat.even_or_odd n with hn hn,
-  { rw even.neg_one_pow hn,
-    rw [add_comm, nat.odd_add] at h,
-    rw odd.neg_one_pow _,
-    { simp },
-    { exact h.mpr hn } },
-  { rw odd.neg_one_pow hn,
-    rw nat.odd_add at h,
-    rw even.neg_one_pow,
-    exact h.mp hn }
-end
-
-lemma coeff_hermite_comp_neg_X' (k n : ℕ) :
-((hermite n).comp (-X)).coeff k = (-1)^k * (hermite n).coeff k :=
-begin
-  rw polynomial.coeff_comp_neg_X,
-end
-
 lemma coeff_hermite_of_odd_add' {n k : ℕ} (hnk : odd (n + k)) : coeff (hermite n) k = 0 :=
 begin
-  apply neg_eq_self_iff.mp,
-  { have h₁ := coeff_hermite_comp_neg_X n k,
-    have h₂ := coeff_hermite_comp_neg_X' k n,
-    have h₃ := eq_neg_of_odd_add n k hnk,
-    have h₄ : (-1:ℤ)^k ≠ 0,
+  apply neg_eq_self_iff.mp _,
+  repeat { apply_instance },
+  { have H : (-1:ℤ)^k ≠ 0,
     { apply pow_ne_zero,
       rw neg_ne_zero,
       exact one_ne_zero },
-    rw h₁ at h₂,
-    rw h₃ at h₂,
-    rw [← neg_mul_eq_neg_mul, neg_eq_self_iff, mul_eq_zero] at h₂,
-    cases h₂,
+    have h : (-1 : ℤ) ^ k = 0 ∨ (hermite n).coeff k = 0,
+    { rw [← mul_eq_zero, ← neg_eq_self_iff, neg_mul_eq_neg_mul,
+          ← neg_one_pow_eq_neg_of_odd_add n k hnk, ← coeff_hermite_comp_neg_X n k,
+          (by rw polynomial.coeff_comp_neg_X :
+          ((hermite n).comp (-X)).coeff k = (-1)^k * (hermite n).coeff k)] },
+    cases h,
     { exfalso,
-      exact h₄ h₂ },
-    { rw h₂,
+      exact H h },
+    { rw h,
       simp } },
-  { sorry },
-  { sorry }
 end
 
+-- lemma coeff_hermite_comp_neg_X' (k n : ℕ) :
+-- ((hermite n).comp (-X)).coeff k = (-1)^k * (hermite n).coeff k :=
+-- begin
+--   rw polynomial.coeff_comp_neg_X,
+-- end
 
+-- lemma coeff_hermite_of_odd_add' {n k : ℕ} (hnk : odd (n + k)) : coeff (hermite n) k = 0 :=
+-- begin
+--   apply neg_eq_self_iff.mp,
+--   { have h₁ := coeff_hermite_comp_neg_X n k,
+--     have h₂ := coeff_hermite_comp_neg_X' k n,
+--     have h₃ := eq_neg_of_odd_add n k hnk,
+--     have h₄ : (-1:ℤ)^k ≠ 0,
+--     { apply pow_ne_zero,
+--       rw neg_ne_zero,
+--       exact one_ne_zero },
+--     rw h₁ at h₂,
+--     rw h₃ at h₂,
+--     rw [← neg_mul_eq_neg_mul, neg_eq_self_iff, mul_eq_zero] at h₂,
+--     cases h₂,
+--     { exfalso,
+--       exact h₄ h₂ },
+--     { rw h₂,
+--       simp } },
+--   repeat { apply_instance },
+-- end
+
+-- lemma coeff_hermite_comp_neg_X (n k : ℕ) :
+-- ((hermite n).comp (-X)).coeff k = (-1)^n * (hermite n).coeff k :=
+-- begin
+--   rw hermite_comp_neg_X,
+--   convert coeff_C_mul _,
+--   simp,
+-- end
 
 end coeff
 end polynomial
