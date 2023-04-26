@@ -4,9 +4,6 @@ import coeff
 import explicit
 open polynomial
 
-#check hermite_coeff_odd_zero
-
-
 
 -- lemma hermite_eval_even (n : ℕ) (x : ℝ) :
 -- eval (-x) (hermite n) = if (even n) then eval x (hermite n) else -(eval x (hermite n)) :=
@@ -123,3 +120,48 @@ begin
   { rw h2 i hi, ring },
   { rw [neg_pow, hi.neg_one_pow], ring }
 end
+
+lemma polynomial_odd_or_even (n : ℕ) (x : ℤ) (p : polynomial ℤ)
+(hp : ∀ k, odd (n + k) → p.coeff k = 0) : p.eval (-x) = (-1)^n * p.eval x :=
+begin
+  repeat {rw polynomial.eval_eq_sum_range},
+  rw finset.mul_sum,
+  congr',
+  ext i,
+  rw [neg_pow],
+  nth_rewrite 1 mul_comm,
+  rw [← mul_assoc, mul_comm],
+  cases nat.even_or_odd (n+i) with hni hni,
+  { 
+    rw (_ : (-1:ℤ)^i = (-1:ℤ)^n),
+    
+    sorry,
+    -- cases nat.even_or_odd i with hi hi,
+    -- { have hn : even n, by { rwa nat.even_add.mp hni },
+    --   repeat {rw (neg_one_pow_eq_one_iff_even _).mpr},
+    --   exact hn,
+    --   sorry,
+    --   exact hi,
+    --   sorry, },
+    -- {  } 
+    },
+  { rw hp i hni,
+    simp, }
+end
+
+lemma hermite_eval_even_odd (n : ℕ) (x : ℤ) :
+(hermite n).eval (-x) = (-1)^n * (hermite n).eval x :=
+begin
+  repeat {rw polynomial.eval_eq_sum_range},
+  rw finset.mul_sum,
+  congr',
+  ext i,
+  rw [neg_pow],
+  nth_rewrite 1 mul_comm,
+  rw [← mul_assoc, mul_comm],
+  sorry
+end
+
+
+lemma polynomial.coeff_comp_neg_X {R : Type} [comm_ring R] {p : polynomial R} (k : ℕ) :
+(p.comp (-X).coeff k = )
